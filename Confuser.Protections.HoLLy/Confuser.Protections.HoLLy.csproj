@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AntiWatermark\AntiWatermarkProtection.cs" />
+    <Compile Include="AntiWatermark\AntiWatermarkPhase.cs" />
     <Compile Include="FakeObuscator\FakeObfuscatorPhase.cs" />
     <Compile Include="FakeObuscator\FakeObfuscatorProtection.cs" />
     <Compile Include="FakeObuscator\Types\AgileDotNet.cs" />
