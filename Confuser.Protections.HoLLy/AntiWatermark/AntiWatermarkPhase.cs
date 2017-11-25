@@ -1,5 +1,6 @@
 ﻿using System;
 using Confuser.Core;
+using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.AntiWatermark
 {
@@ -14,8 +15,10 @@ namespace Confuser.Protections.HoLLy.AntiWatermark
 			//look for watermark and remove it
 		    foreach (var md in context.Modules) {
 		        var attr = md.CustomAttributes.Find("ConfusedByAttribute");
-                if (attr != null)
-                    md.CustomAttributes.Remove(attr);
+		        if (attr != null) {
+		            md.CustomAttributes.Remove(attr);
+		            md.Types.Remove((TypeDef)attr.AttributeType);
+		        }
 		    }
 		}
 	}
