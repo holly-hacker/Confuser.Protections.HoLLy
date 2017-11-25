@@ -52,6 +52,15 @@
     <Compile Include="FakeObuscator\FakeObfuscatorProtection.cs" />
     <Compile Include="FakeObuscator\Types\AgileDotNet.cs" />
     <Compile Include="FakeObuscator\Types\BabelDotNet.cs" />
+    <Compile Include="FakeObuscator\Types\CodeFort.cs" />
+    <Compile Include="FakeObuscator\Types\CodeWall.cs" />
+    <Compile Include="FakeObuscator\Types\CryptoObfuscator.cs" />
+    <Compile Include="FakeObuscator\Types\Dotfuscator.cs" />
+    <Compile Include="FakeObuscator\Types\EazfuscatorDotNet.cs" />
+    <Compile Include="FakeObuscator\Types\GoliathDotNet.cs" />
+    <Compile Include="FakeObuscator\Types\SmartAssembly.cs" />
+    <Compile Include="FakeObuscator\Types\SpicesDotNet.cs" />
+    <Compile Include="FakeObuscator\Types\Xenocode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeHelper.cs" />
   </ItemGroup>

@@ -22,10 +22,36 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
         {
 			//inject types
             foreach (ModuleDef m in parameters.Targets.OfType<ModuleDef>()) {
-                InjectType(m, context.Logger, AgileDotNet.GetTypeDefs());	//+10 TODO resource decrypter
+                InjectType(m, context.Logger, AgileDotNet.GetTypeDefs());	//+10
 
                 InjectType(m, context.Logger, BabelDotNet.GetTypeDefs());	//+10
-                InjectType(m, context.Logger, BabelDotNet.GetTypes());	//+110
+                InjectType(m, context.Logger, BabelDotNet.GetTypes());		//+110
+
+                InjectType(m, context.Logger, CodeFort.GetTypes());         //+100
+
+                InjectType(m, context.Logger, CodeWall.GetTypes());         //+100
+
+                InjectType(m, context.Logger, CryptoObfuscator.GetTypeDefs()); //+10
+                InjectType(m, context.Logger, CryptoObfuscator.GetTypes()); //+120
+
+                InjectType(m, context.Logger, Dotfuscator.GetTypeDefs());   //+10
+	            InjectType(m, context.Logger, Dotfuscator.GetTypes());      //+100
+
+	            InjectType(m, context.Logger, EazfuscatorDotNet.GetTypes()); //+100
+
+				InjectType(m, context.Logger, GoliathDotNet.GetTypeDefs()); //+10
+                InjectType(m, context.Logger, GoliathDotNet.GetTypes());    //+100
+
+	            InjectType(m, context.Logger, SpicesDotNet.GetTypeDefs()); //+10
+
+				InjectType(m, context.Logger, Xenocode.GetTypeDefs());      //+10
+	            InjectType(m, context.Logger, Xenocode.GetTypes());         //+100
+
+	            InjectType(m, context.Logger, SmartAssembly.GetTypeDefs()); //+10
+
+
+				//in case unknown obfuscator is forced
+				InjectType(m, context.Logger, new TypeDefUser("YanoAttribute"));
             }
 
 			//TODO: obfuscate names in DefaultNamespace

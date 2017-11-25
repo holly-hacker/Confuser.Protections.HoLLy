@@ -13,7 +13,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 	internal class BabelDotNet
 	{
 		public static TypeDefUser GetTypeDefs() => new TypeDefUser("BabelAttribute");
-
 		public static Type[] GetTypes() => new[] {typeof(BabelAssemblyResolver), typeof(BabelStringDecrypter) };
 
 		//no events
@@ -28,7 +27,7 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 			private static void Register()
 			{
 				try {
-				    //ldftn to OnAssemblyResolve
+				    //ldftn OnAssemblyResolve
 				    AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
                 } catch (Exception) { }
 			}
