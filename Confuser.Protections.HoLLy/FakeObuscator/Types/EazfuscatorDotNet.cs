@@ -5,7 +5,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 {
 	internal class EazfuscatorDotNet
 	{
-		//public static TypeDef GetTypeDefs() => new TypeDefUser("ObfuscatedByGoliath");
 		public static Type[] GetTypes() => new[] {typeof(EazfuscatorStringDecrypter)};
 
 		internal class EazfuscatorStringDecrypter

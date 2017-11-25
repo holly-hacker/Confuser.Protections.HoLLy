@@ -5,6 +5,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 {
     internal class SmartAssembly
     {
-        public static TypeDef GetTypeDefs() => new TypeDefUser("SmartAssembly.Attributes", "PoweredByAttribute");
+        public static TypeDefUser GetAttributes() => new TypeDefUser("SmartAssembly.Attributes", "PoweredByAttribute");
     }
 }

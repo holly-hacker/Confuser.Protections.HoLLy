@@ -5,6 +5,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 {
 	internal class SpicesDotNet
 	{
-		public static TypeDef GetTypeDefs() => new TypeDefUser("NineRays.Obfuscator", "SoftwareWatermarkAttribute");
+		public static TypeDefUser GetAttributes() => new TypeDefUser("NineRays.Obfuscator", "SoftwareWatermarkAttribute");
 	}
 }

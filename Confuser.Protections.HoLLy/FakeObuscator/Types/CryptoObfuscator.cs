@@ -8,7 +8,7 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 {
 	internal class CryptoObfuscator
     {
-        public static TypeDef GetTypeDefs() => new TypeDefUser("CryptoObfuscator", "ProtectedWithCryptoObfuscatorAttribute");
+        public static TypeDefUser GetAttributes() => new TypeDefUser("CryptoObfuscator", "ProtectedWithCryptoObfuscatorAttribute");
         public static Type[] GetTypes() => new[] {
 			typeof(CryptoObfuscatorMethodDecrypter),
 			typeof(CryptoObfuscatorStringDecrypter),

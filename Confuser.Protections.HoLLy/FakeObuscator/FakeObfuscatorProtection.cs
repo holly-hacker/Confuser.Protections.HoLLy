@@ -15,9 +15,11 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
 
         protected override void PopulatePipeline(ProtectionPipeline pipeline)
         {
-            //this has to run after other protections to ensure it isn't modified
-			//TODO: after packer?
-            pipeline.InsertPostStage(PipelineStage.EndModule, new FakeObfuscatorPhase(this));
+            //TODO: run before the NameProtection post-rename phase (which is pre EndModule)
+            pipeline.InsertPostStage(PipelineStage.EndModule, new FakeObfuscatorTypesPhase(this));
+            
+            //TODO: run after NameProtection, but before AntiTamper
+            pipeline.InsertPreStage(PipelineStage.WriteModule, new FakeObfuscatorAttributesPhase(this));
         }
     }
 }

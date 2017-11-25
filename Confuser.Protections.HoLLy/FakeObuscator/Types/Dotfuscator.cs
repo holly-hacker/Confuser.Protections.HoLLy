@@ -5,7 +5,7 @@ namespace Confuser.Protections.HoLLy.FakeObuscator.Types
 {
 	internal class Dotfuscator
 	{
-		public static TypeDefUser GetTypeDefs() => new TypeDefUser("DotfuscatorAttribute");
+		public static TypeDefUser GetAttributes() => new TypeDefUser("DotfuscatorAttribute");
 	    public static Type[] GetTypes() => new[] { typeof(DotfuscatorStringDecrypter) };
 
         internal class DotfuscatorStringDecrypter
