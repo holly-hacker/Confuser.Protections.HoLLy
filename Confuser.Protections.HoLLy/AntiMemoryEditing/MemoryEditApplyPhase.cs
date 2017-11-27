@@ -18,7 +18,6 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
             //TODO: split type injection into other phase?
-            //TODO: rewrite this entire thing because it is shit and doesn't work
 
             var m = context.CurrentModule;
 
@@ -28,7 +27,11 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
             newType.GenericParameters.Add(new GenericParamUser(0, GenericParamAttributes.NonVariant, "T"));
             m.Types.Add(newType);
             InjectHelper.Inject(obfType, newType, m);
-            
+
+            //find read/write methods
+            var methods = newType.FindMethods("op_Implicit").ToArray();
+            var methodRead = methods[0];
+            var methodWrite = methods[1];
 
             var service = context.Registry.GetService<IMemoryEditService>();
 
@@ -38,62 +41,45 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
             }
 
             //run through all methods, patching r/w
-            context.Logger.Info("Looping through all types to patch access to obfuscated values");
+            context.Logger.Debug("Looping through all types to patch access to obfuscated values");
             foreach (MethodDef t in context.CurrentModule.GetTypes().SelectMany(a => a.Methods).WithProgress(context.Logger)) {
                 if (!t.HasBody || !t.Body.HasInstructions) continue;
 
                 for (int i = 0; i < t.Body.Instructions.Count; i++) {
                     Instruction instr = t.Body.Instructions[i];
+
                     if (instr.Operand == null) continue;
+                    if (!(instr.Operand is FieldDef fd) || !(fd.FieldType is GenericInstSig sig)) continue;
+                    if (!new SigComparer().Equals(sig.GenericType.TypeDef, newType)) continue;
+
+                    //TODO: newobj may be required for structs, even though it is not supported
                     switch (instr.OpCode.Code) {
                         case Code.Ldfld:
                         case Code.Ldsfld: {
                             //loading field
                             //add a call after it
-                            if (!(instr.Operand is FieldDef fd) || !(fd.FieldType is GenericInstSig gis)) continue;
-
-                            var td = gis.GenericType.TypeDef;
-                            if (td.FullName != newType.FullName) continue;
-
-                            context.Logger.Debug(gis.ToString());
-                                
-                            context.Logger.InfoFormat("Type (L): {0}", td);
-                            var method = td.FindMethods("op_Implicit").ToArray()[0];
-                            context.Logger.InfoFormat("Method: {0}", method);
-
-                            var mref = new MemberRefUser(m, "op_Implicit", method.MethodSig);
-                            context.Logger.InfoFormat("MemberRef: {0}", mref);
-
-                            mref.Class = new TypeSpecUser(gis);
-                            context.Logger.InfoFormat("Class: {0}", mref.Class);
-
-                            t.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, mref));
+                            t.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, FindReadMethod(m, sig, methodRead)));
                             i++;
                             break;
                         }
                         case Code.Stfld:
                         case Code.Stsfld: {
-                            //loading field
-                            //add a call after it
-                            if (!(instr.Operand is FieldDef fd) || !(fd.FieldType is GenericInstSig gis)) continue;
-
-                            var td = gis.GenericType.TypeDef;
-                            if (td.FullName != newType.FullName) continue;
-
-                            var method = td.FindMethods("op_Implicit").ToArray()[1];
-                            var mref = new MemberRefUser(m, "op_Implicit", method.MethodSig);
-                            mref.Class = new TypeSpecUser(gis);
-
-                            t.Body.Instructions.Insert(i, new Instruction(OpCodes.Call, mref));
+                            //storing field
+                            //add a call before it
+                            t.Body.Instructions.Insert(i, new Instruction(OpCodes.Call, FindReadMethod(m, sig, methodWrite)));
                             i++;
                         }
                         break;
                     }
                 }
             }
+            
+            //TODO: apply to locals (if applied to methods)
+        }
 
-
-            //TODO: apply to locals
+        private static MemberRefUser FindReadMethod(ModuleDef m, GenericInstSig sig, IMethod method)
+        {
+            return new MemberRefUser(m, method.Name, method.MethodSig) { Class = new TypeSpecUser(sig) };
         }
     }
 }
