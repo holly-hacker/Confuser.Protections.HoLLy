@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Confuser.Core;
-using Confuser.Core.Helpers;
-using Confuser.Protections.HoLLy.AntiMemoryEditing.Types;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 
@@ -17,27 +15,17 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
 
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
-            //TODO: split type injection into other phase?
-
             var m = context.CurrentModule;
 
-            //import type
-            var obfType = RuntimeHelper.GetType(typeof(ObfuscatedValue<>));
-            var newType = new TypeDefUser("ConfuserEx.Protections.HoLLy.AntiMemoryEditing.Types", obfType.Name, new Importer(m).Import(typeof(object)));
-            newType.GenericParameters.Add(new GenericParamUser(0, GenericParamAttributes.NonVariant, "T"));
-            m.Types.Add(newType);
-            InjectHelper.Inject(obfType, newType, m);
-
-            //find read/write methods
-            var methods = newType.FindMethods("op_Implicit").ToArray();
-            var methodRead = methods[0];
-            var methodWrite = methods[1];
-
+            //get type and methods
             var service = context.Registry.GetService<IMemoryEditService>();
+            var wrapperType = service.GetWrapperType(m);
+            var methodRead = service.GetReadMethod(m);
+            var methodWrite = service.GetWriteMethod(m);
 
             //wrap all fields in this type
             foreach (FieldDef field in service.GetFields()) {
-                field.FieldType = new GenericInstSig((ClassOrValueTypeSig)newType.ToTypeSig(), field.FieldType.ToTypeDefOrRefSig());
+                field.FieldType = new GenericInstSig((ClassOrValueTypeSig)wrapperType.ToTypeSig(), field.FieldType.ToTypeDefOrRefSig());
             }
 
             //run through all methods, patching r/w
@@ -50,7 +38,7 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
 
                     if (instr.Operand == null) continue;
                     if (!(instr.Operand is FieldDef fd) || !(fd.FieldType is GenericInstSig sig)) continue;
-                    if (!new SigComparer().Equals(sig.GenericType.TypeDef, newType)) continue;
+                    if (!new SigComparer().Equals(sig.GenericType.TypeDef, wrapperType)) continue;
 
                     //TODO: newobj may be required for structs, even though it is not supported
                     switch (instr.OpCode.Code) {
