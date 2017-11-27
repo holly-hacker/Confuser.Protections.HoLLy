@@ -17,3 +17,10 @@ This also has the side-effect of making de4dot freeze when deobfuscating (as of 
 Id: `fake obfuscator`  
 FullId: `HoLLy.FakeObfuscator`  
 Preset: Normal
+
+### Memory Protection
+Hides the marked types from normal memory searching/editing.
+
+Id: `memory protection`  
+FullId: `HoLLy.MemoryProtection`  
+Preset: None, on-demand only

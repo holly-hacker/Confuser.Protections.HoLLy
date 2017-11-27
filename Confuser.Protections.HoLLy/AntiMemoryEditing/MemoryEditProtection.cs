@@ -1,0 +1,33 @@
+﻿using System;
+using Confuser.Core;
+
+namespace Confuser.Protections.HoLLy.AntiMemoryEditing
+{
+    public class MemoryEditProtection : Protection
+    {
+        public override string Name => "Anti Memory Editing";
+        public override string Description => "Prevent memory editing on selected variables.";
+        public override string Id => "memory protection";
+        public override string FullId => "HoLLy.MemoryProtection";
+        public override ProtectionPreset Preset => ProtectionPreset.None;
+
+        protected override void Initialize(ConfuserContext context)
+        {
+            context.Registry.RegisterService(Id, typeof(IMemoryEditService), new MemoryEditService());
+        }
+
+        protected override void PopulatePipeline(ProtectionPipeline pipeline)
+        {
+            //find all types that need to be modified
+            pipeline.InsertPostStage(PipelineStage.Inspection, new MemoryEditAnalyzePhase(this));
+
+            //insert type
+            //TODO: move to an earlier stage, before renaming happens
+            pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditInjectPhase(this));
+
+            //change type and apply IL changes
+            //TODO: move to an earlier stage
+            pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditApplyPhase(this));
+        }
+    }
+}

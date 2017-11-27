@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Confuser.Core">
@@ -48,6 +50,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AntiMemoryEditing\MemoryEditAnalyzePhase.cs" />
+    <Compile Include="AntiMemoryEditing\MemoryEditApplyPhase.cs" />
+    <Compile Include="AntiMemoryEditing\MemoryEditInjectPhase.cs" />
+    <Compile Include="AntiMemoryEditing\MemoryEditProtection.cs" />
+    <Compile Include="AntiMemoryEditing\MemoryEditService.cs" />
+    <Compile Include="AntiMemoryEditing\Types\ObfuscatedValue.cs" />
     <Compile Include="AntiWatermark\AntiWatermarkProtection.cs" />
     <Compile Include="AntiWatermark\AntiWatermarkPhase.cs" />
     <Compile Include="FakeObuscator\FakeObfuscatorAttributesPhase.cs" />
@@ -70,5 +78,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
