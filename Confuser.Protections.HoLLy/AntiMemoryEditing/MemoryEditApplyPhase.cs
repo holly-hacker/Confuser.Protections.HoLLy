@@ -56,11 +56,18 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
                             if (td.FullName != newType.FullName) continue;
 
                             context.Logger.Debug(gis.ToString());
-
-                            context.Logger.InfoFormat("Type (L): {0}", td);
-                            var mr = td.FindMethods("op_Implicit").ToArray()[0];
                                 
-                            t.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, mr));
+                            context.Logger.InfoFormat("Type (L): {0}", td);
+                            var method = td.FindMethods("op_Implicit").ToArray()[0];
+                            context.Logger.InfoFormat("Method: {0}", method);
+
+                            var mref = new MemberRefUser(m, "op_Implicit", method.MethodSig);
+                            context.Logger.InfoFormat("MemberRef: {0}", mref);
+
+                            mref.Class = new TypeSpecUser(gis);
+                            context.Logger.InfoFormat("Class: {0}", mref.Class);
+
+                            t.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, mref));
                             i++;
                             break;
                         }
@@ -73,10 +80,11 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
                             var td = gis.GenericType.TypeDef;
                             if (td.FullName != newType.FullName) continue;
 
-                            context.Logger.InfoFormat("Type (S): {0}", td);
-                            var mr = td.FindMethods("op_Implicit").ToArray()[1];
+                            var method = td.FindMethods("op_Implicit").ToArray()[1];
+                            var mref = new MemberRefUser(m, "op_Implicit", method.MethodSig);
+                            mref.Class = new TypeSpecUser(gis);
 
-                            t.Body.Instructions.Insert(i, new Instruction(OpCodes.Call, mr));
+                            t.Body.Instructions.Insert(i, new Instruction(OpCodes.Call, mref));
                             i++;
                         }
                         break;
