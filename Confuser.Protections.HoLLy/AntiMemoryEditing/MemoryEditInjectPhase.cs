@@ -2,7 +2,9 @@
 using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Helpers;
+using Confuser.Core.Services;
 using Confuser.Protections.HoLLy.Runtime.AntiMemoryEditing;
+using Confuser.Renamer;
 using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.AntiMemoryEditing
@@ -19,13 +21,15 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
             var m = context.CurrentModule;
 
             var service = context.Registry.GetService<IMemoryEditService>();
+            var marker = context.Registry.GetService<IMarkerService>();
+            var name = context.Registry.GetService<INameService>();
 
             //import type
             var obfType = RuntimeHelper.GetType(typeof(ObfuscatedValue<>));
-            var newType = new TypeDefUser("ConfuserEx.Protections.HoLLy.AntiMemoryEditing.Types", obfType.Name, new Importer(m).Import(typeof(object)));
+            var newType = new TypeDefUser(obfType.Namespace, obfType.Name, new Importer(m).Import(typeof(object)));
             newType.GenericParameters.Add(new GenericParamUser(0, GenericParamAttributes.NonVariant, "T"));
             m.Types.Add(newType);
-            InjectHelper.Inject(obfType, newType, m);
+            var injected = InjectHelper.Inject(obfType, newType, m);
             service.SetWrapperType(m, newType);
 
             //find read/write methods
@@ -33,7 +37,20 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
             service.SetReadMethod(m, methods[0]);
             service.SetWriteMethod(m, methods[1]);
 
-            //TODO: mark type for renaming
+            //mark type for renaming
+            name.MarkHelper(newType, marker, Parent);
+            
+            //workaround for issue below
+            foreach (IDnlibDef def in injected)
+                marker.Mark(def, Parent);
+
+            //TODO: this breaks it. Why?
+            //foreach (MethodDef method in newType.Methods)
+            //    name.MarkHelper(method, marker, Parent);
+            //foreach (FieldDef field in newType.Fields)
+            //    name.MarkHelper(field, marker, Parent);
+            //foreach (PropertyDef property in newType.Properties)
+            //    name.MarkHelper(property, marker, Parent);
         }
     }
 }

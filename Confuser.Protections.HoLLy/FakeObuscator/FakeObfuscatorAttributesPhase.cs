@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using Confuser.Core;
 using Confuser.Core.Helpers;
+using Confuser.Core.Services;
 using Confuser.Protections.HoLLy.Runtime.FakeObfuscator;
+using Confuser.Renamer;
 using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.FakeObuscator
@@ -16,32 +18,47 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
         
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
+            ModuleDef m = context.CurrentModule;
+            var marker = context.Registry.GetService<IMarkerService>();
+            var name = context.Registry.GetService<INameService>();
+            var allAddedTypes = new List<IDnlibDef>();
+
+            TypeDefUser[] attributesToAdd = {
+                AgileDotNet.GetAttributes(),    //+10
+                BabelDotNet.GetAttributes(),    //+10
+                CryptoObfuscator.GetAttributes(), //+10
+                Dotfuscator.GetAttributes(),    //+10
+                GoliathDotNet.GetAttributes(),  //+10
+                SpicesDotNet.GetAttributes(),   //+10
+                Xenocode.GetAttributes(),       //+10
+                SmartAssembly.GetAttributes(),  //+10
+                new TypeDefUser("YanoAttribute")//for unknown obfuscator
+            };
+
             //inject types
-            foreach (ModuleDef m in parameters.Targets.OfType<ModuleDef>())
-            {
-                InjectType(m, context.Logger, AgileDotNet.GetAttributes());     //+10
-                InjectType(m, context.Logger, BabelDotNet.GetAttributes());     //+10
-                InjectType(m, context.Logger, CryptoObfuscator.GetAttributes()); //+10
-                InjectType(m, context.Logger, Dotfuscator.GetAttributes());     //+10
-                InjectType(m, context.Logger, GoliathDotNet.GetAttributes());   //+10
-                InjectType(m, context.Logger, SpicesDotNet.GetAttributes());    //+10
-                InjectType(m, context.Logger, Xenocode.GetAttributes());        //+10
-                InjectType(m, context.Logger, SmartAssembly.GetAttributes());   //+10
-                
-                //in case unknown obfuscator is forced
-                InjectType(m, context.Logger, new TypeDefUser("YanoAttribute"));
+            foreach (TypeDefUser idk in attributesToAdd)
+                allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
+
+            //mark types to NOT be renamed
+            foreach (IDnlibDef def in allAddedTypes) {
+                marker.Mark(def, Parent);
+                name.SetCanRename(def, false);
             }
         }
 
-        private static void InjectType(ModuleDef m, Core.ILogger l, params TypeDefUser[] types)
+        private static IEnumerable<IDnlibDef> InjectType(ModuleDef m, Core.ILogger l, params TypeDefUser[] types)
         {
+            List<IDnlibDef> ret = new List<IDnlibDef>();
+
             foreach (TypeDefUser type in types)
             {
                 m.Types.Add(type);
                 l.Debug("Added attribute " + type);
 
-                InjectHelper.Inject(type, type, m);
+                ret.AddRange(InjectHelper.Inject(type, type, m));
             }
+
+            return ret;
         }
     }
 }

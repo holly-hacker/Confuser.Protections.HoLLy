@@ -39,6 +39,10 @@
       <HintPath>..\packages\ConfuserEx.Final.1.0.0\tools\Confuser.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Confuser.Renamer">
+      <HintPath>..\packages\ConfuserEx.Final.1.0.0\tools\Confuser.Renamer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="dnlib">
       <HintPath>..\packages\ConfuserEx.Final.1.0.0\tools\dnlib.dll</HintPath>
       <Private>False</Private>

@@ -22,12 +22,10 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
             pipeline.InsertPostStage(PipelineStage.Inspection, new MemoryEditAnalyzePhase(this));
 
             //insert type
-            //TODO: move to an earlier stage, before renaming happens
-            pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditInjectPhase(this));
+            pipeline.InsertPostStage(PipelineStage.BeginModule, new MemoryEditInjectPhase(this));
 
             //change type and apply IL changes
-            //TODO: move to an earlier stage
-            pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditApplyPhase(this));
+            pipeline.InsertPreStage(PipelineStage.ProcessModule, new MemoryEditApplyPhase(this));
         }
     }
 }

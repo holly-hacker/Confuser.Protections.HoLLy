@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Helpers;
+using Confuser.Core.Services;
 using Confuser.Protections.HoLLy.Runtime.FakeObfuscator;
+using Confuser.Renamer;
 using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.FakeObuscator
@@ -18,30 +21,45 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
 
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
-			//inject types
-            foreach (ModuleDef m in parameters.Targets.OfType<ModuleDef>()) {
-                InjectType(m, context.Logger, BabelDotNet.GetTypes());		//+110
-                InjectType(m, context.Logger, CodeFort.GetTypes());         //+100
-                InjectType(m, context.Logger, CodeWall.GetTypes());         //+100
-                InjectType(m, context.Logger, CryptoObfuscator.GetTypes()); //+120
-	            InjectType(m, context.Logger, Dotfuscator.GetTypes());      //+100
-	            InjectType(m, context.Logger, EazfuscatorDotNet.GetTypes()); //+100
-                InjectType(m, context.Logger, GoliathDotNet.GetTypes());    //+100
-	            InjectType(m, context.Logger, Xenocode.GetTypes());         //+100
-            }
+            ModuleDef m = context.CurrentModule;
+            var marker = context.Registry.GetService<IMarkerService>();
+            var name = context.Registry.GetService<INameService>();
+            var allAddedTypes = new List<IDnlibDef>();
 
-			//TODO: obfuscate names in DefaultNamespace
+            Type[][] typesToAdd = {
+                BabelDotNet.GetTypes(),     //+110
+                CodeFort.GetTypes(),        //+100
+                CodeWall.GetTypes(),        //+100
+                CryptoObfuscator.GetTypes(),//+120
+                Dotfuscator.GetTypes(),     //+100
+                EazfuscatorDotNet.GetTypes(),//+100
+                GoliathDotNet.GetTypes(),   //+100
+                Xenocode.GetTypes()         //+100
+            };
+
+            //inject types
+            foreach (Type[] idk in typesToAdd)
+                allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
+
+            //mark types
+            foreach (IDnlibDef def in allAddedTypes)
+                name.MarkHelper(def, marker, Parent);
 		}
 
-		private static void InjectType(ModuleDef m, Core.ILogger l, params Type[] types)
-	    {
+		private static IEnumerable<IDnlibDef> InjectType(ModuleDef m, Core.ILogger l, params Type[] types)
+		{
+		    List<IDnlibDef> ret = new List<IDnlibDef>();
+
 		    foreach (TypeDef type in types.Select(RuntimeHelper.GetType)) {
 			    var newType = new TypeDefUser(DefaultNamespace, type.Name);
 			    m.Types.Add(newType);
 			    l.Debug("Added type " + newType);
 
-			    InjectHelper.Inject(type, newType, m);
+                ret.Add(newType);
+			    ret.AddRange(InjectHelper.Inject(type, newType, m));
 		    }
+
+		    return ret;
 		}
     }
 }

@@ -8,7 +8,7 @@ namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 	internal class GoliathDotNet
 	{
 		public static TypeDefUser GetAttributes() => new TypeDefUser("ObfuscatedByGoliath");
-		public static Type GetTypes() => typeof(GoliathStrongNameChecker);
+	    public static Type[] GetTypes() => new[] {typeof(GoliathStrongNameChecker)};
 
         //no fields, no events, no properties
 		internal class GoliathStrongNameChecker
