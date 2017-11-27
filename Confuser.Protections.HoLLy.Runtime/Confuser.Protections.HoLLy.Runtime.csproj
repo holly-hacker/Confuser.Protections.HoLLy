@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="dnlib">
       <HintPath>..\packages\ConfuserEx.Final.1.0.0\tools\dnlib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
