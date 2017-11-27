@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using dnlib.DotNet;
 
-namespace Confuser.Protections.HoLLy.FakeObuscator.Types
+namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
 	internal class GoliathDotNet
 	{

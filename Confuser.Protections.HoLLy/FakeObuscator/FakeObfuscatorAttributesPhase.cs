@@ -2,7 +2,7 @@
 using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Helpers;
-using Confuser.Protections.HoLLy.FakeObuscator.Types;
+using Confuser.Protections.HoLLy.Runtime.FakeObfuscator;
 using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.FakeObuscator

@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using dnlib.DotNet;
 
-namespace Confuser.Protections.HoLLy.FakeObuscator.Types
+namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
 	internal class CryptoObfuscator
     {

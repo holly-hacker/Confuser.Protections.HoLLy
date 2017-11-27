@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Confuser.Protections.HoLLy.FakeObuscator.Types
+namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
 	internal class EazfuscatorDotNet
 	{

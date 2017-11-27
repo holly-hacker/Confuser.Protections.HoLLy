@@ -1,7 +1,6 @@
-﻿using System;
-using dnlib.DotNet;
+﻿using dnlib.DotNet;
 
-namespace Confuser.Protections.HoLLy.FakeObuscator.Types
+namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
     internal static class AgileDotNet
     {

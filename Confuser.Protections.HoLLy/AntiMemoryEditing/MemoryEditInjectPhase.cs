@@ -2,12 +2,12 @@
 using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Helpers;
-using Confuser.Protections.HoLLy.AntiMemoryEditing.Types;
+using Confuser.Protections.HoLLy.Runtime.AntiMemoryEditing;
 using dnlib.DotNet;
 
 namespace Confuser.Protections.HoLLy.AntiMemoryEditing
 {
-    class MemoryEditInjectPhase : ProtectionPhase
+    internal class MemoryEditInjectPhase : ProtectionPhase
     {
         public override ProtectionTargets Targets => ProtectionTargets.Modules;
         public override string Name => "Memory obfuscation type injection";

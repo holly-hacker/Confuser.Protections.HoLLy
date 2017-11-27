@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
+using System.Text;
 
-namespace Confuser.Protections.HoLLy.AntiMemoryEditing.Types
+namespace Confuser.Protections.HoLLy.Runtime.AntiMemoryEditing
 {
     internal class ObfuscatedValue<T>
     {
@@ -36,7 +36,7 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing.Types
             switch (currentvalue)
             {
                 case string s:
-                    return (T)(object)new string(s.Select(a => (char)(a ^ salt)).ToArray());
+                    return (T)(object)XorString(s, salt);
                 case int i:
                     return (T)(object)(i ^ salt);
                 case double d:
@@ -49,6 +49,15 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing.Types
                     else
                         throw new NotSupportedException();
             }
+        }
+
+        private static string XorString(string str, int salt)
+        {
+            var sb = new StringBuilder(str.Length);
+            foreach (char c in str) {
+                sb.Append((char) (c ^ salt));
+            }
+            return sb.ToString();
         }
     }
 }
