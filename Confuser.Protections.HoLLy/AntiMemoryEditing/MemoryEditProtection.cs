@@ -20,7 +20,11 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
         {
             //find all types that need to be modified
             pipeline.InsertPostStage(PipelineStage.Inspection, new MemoryEditAnalyzePhase(this));
-            
+
+            //insert type
+            //TODO: move to an earlier stage, before renaming happens
+            pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditInjectPhase(this));
+
             //change type and apply IL changes
             //TODO: move to an earlier stage
             pipeline.InsertPostStage(PipelineStage.EndModule, new MemoryEditApplyPhase(this));
