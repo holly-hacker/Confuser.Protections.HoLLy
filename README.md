@@ -1,5 +1,8 @@
 # Confuser.Protections.HoLLy
-Extra protection modules for ConfuserEx
+Extra protection modules for ConfuserEx.
+
+Get the latest build at AppVeyor:  
+[![Build status](https://ci.appveyor.com/api/projects/status/4s8myfmgvk0u4wcq?svg=true)](https://ci.appveyor.com/project/HoLLy-HaCKeR/confuser-protections-holly/build/artifacts)
 
 ## Modules
 ### Anti Watermark

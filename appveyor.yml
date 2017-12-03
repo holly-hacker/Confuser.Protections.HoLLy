@@ -1,0 +1,12 @@
+version: x.x.x.{build}
+image: Visual Studio 2017
+configuration: Release
+platform: Any CPU
+before_build:
+- cmd: nuget restore
+build:
+  project: Confuser.Protections.HoLLy.sln
+  verbosity: minimal
+artifacts:
+- path: Confuser.Protections.HoLLy\bin\Release
+  name: Release
