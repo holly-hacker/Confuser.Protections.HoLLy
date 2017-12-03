@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+#pragma warning disable 169
+#pragma warning disable 219
 
 namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
     internal class CodeWall
     {
-        public static Type[] GetTypes() => new[] { typeof(CodeVeilStringDecrypter) };
+        public static Type[] GetTypes() => new[] { typeof(CodeWallStringDecrypter) };
 
         //requires 2 methods: 1 decrypter and any other (eg. cctor)
-        internal static class CodeVeilStringDecrypter
+        internal static class CodeWallStringDecrypter
         {
             //required fields
             private static object _o;

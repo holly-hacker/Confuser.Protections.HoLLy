@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+#pragma warning disable 169
+#pragma warning disable 219
 
 namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {

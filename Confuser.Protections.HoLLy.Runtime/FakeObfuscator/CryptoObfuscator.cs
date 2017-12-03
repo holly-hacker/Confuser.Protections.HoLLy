@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using dnlib.DotNet;
+#pragma warning disable 169
+#pragma warning disable 219
 
 namespace Confuser.Protections.HoLLy.Runtime.FakeObfuscator
 {
