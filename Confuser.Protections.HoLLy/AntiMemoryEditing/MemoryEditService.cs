@@ -30,7 +30,7 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
         public void AddToList(FieldDef d) => _fields.Add(d);
         public IEnumerable<FieldDef> GetFields() => _fields;
 
-        public TypeDef GetWrapperType(ModuleDef mod) => _wrapperTypes[mod];
+        public TypeDef GetWrapperType(ModuleDef mod) => _wrapperTypes.ContainsKey(mod) ?_wrapperTypes[mod] : null;
         public void SetWrapperType(ModuleDef mod, TypeDef t) => _wrapperTypes[mod] = t;
 
         public IMethod GetReadMethod(ModuleDef mod) => _readMethods[mod];

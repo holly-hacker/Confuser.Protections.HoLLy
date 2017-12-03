@@ -21,7 +21,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
 
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
-            ModuleDef m = context.CurrentModule;
             var marker = context.Registry.GetService<IMarkerService>();
             var name = context.Registry.GetService<INameService>();
             var allAddedTypes = new List<IDnlibDef>();
@@ -37,14 +36,17 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
                 Xenocode.GetTypes()         //+100
             };
 
-            //inject types
-            foreach (Type[] idk in typesToAdd)
-                allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
+            foreach (var m in parameters.Targets.Cast<ModuleDef>())
+            {
+                //inject types
+                foreach (Type[] idk in typesToAdd)
+                    allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
 
-            //mark types
-            foreach (IDnlibDef def in allAddedTypes)
-                name.MarkHelper(def, marker, Parent);
-		}
+                //mark types
+                foreach (IDnlibDef def in allAddedTypes)
+                    name.MarkHelper(def, marker, Parent);
+            }
+        }
 
 		private static IEnumerable<IDnlibDef> InjectType(ModuleDef m, Core.ILogger l, params Type[] types)
 		{

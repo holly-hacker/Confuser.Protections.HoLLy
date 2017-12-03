@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Confuser.Core;
 using Confuser.Core.Helpers;
 using Confuser.Core.Services;
@@ -18,7 +19,6 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
         
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
-            ModuleDef m = context.CurrentModule;
             var marker = context.Registry.GetService<IMarkerService>();
             var name = context.Registry.GetService<INameService>();
             var allAddedTypes = new List<IDnlibDef>();
@@ -35,14 +35,18 @@ namespace Confuser.Protections.HoLLy.FakeObuscator
                 new TypeDefUser("YanoAttribute")//for unknown obfuscator
             };
 
-            //inject types
-            foreach (TypeDefUser idk in attributesToAdd)
-                allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
+            foreach (var m in parameters.Targets.Cast<ModuleDef>())
+            {
+                //inject types
+                foreach (TypeDefUser idk in attributesToAdd)
+                    allAddedTypes.AddRange(InjectType(m, context.Logger, idk));
 
-            //mark types to NOT be renamed
-            foreach (IDnlibDef def in allAddedTypes) {
-                marker.Mark(def, Parent);
-                name.SetCanRename(def, false);
+                //mark types to NOT be renamed
+                foreach (IDnlibDef def in allAddedTypes)
+                {
+                    marker.Mark(def, Parent);
+                    name.SetCanRename(def, false);
+                }
             }
         }
 

@@ -8,7 +8,7 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
 {
     public class MemoryEditApplyPhase : ProtectionPhase
     {
-        public override ProtectionTargets Targets => ProtectionTargets.Properties;
+        public override ProtectionTargets Targets => ProtectionTargets.Fields;
         public override string Name => "Apply memory protection";
 
         public MemoryEditApplyPhase(ConfuserComponent parent) : base(parent) { }
@@ -17,9 +17,14 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
         {
             var m = context.CurrentModule;
 
-            //get type and methods
+            //get type
             var service = context.Registry.GetService<IMemoryEditService>();
             var wrapperType = service.GetWrapperType(m);
+
+            //if we didn't inject a wrapper type, don't run anything else
+            if (wrapperType == null) return;
+
+            //get methods
             var methodRead = service.GetReadMethod(m);
             var methodWrite = service.GetWriteMethod(m);
 
@@ -39,21 +44,18 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
                     if (instr.Operand == null) continue;
                     if (!(instr.Operand is FieldDef fd) || !(fd.FieldType is GenericInstSig sig)) continue;
                     if (!new SigComparer().Equals(sig.GenericType.TypeDef, wrapperType)) continue;
-
-                    //TODO: newobj may be required for structs, even though it is not supported
+                    
                     switch (instr.OpCode.Code) {
                         case Code.Ldfld:
                         case Code.Ldsfld: {
-                            //loading field
-                            //add a call after it
+                            //loading field: add a call after it
                             t.Body.Instructions.Insert(i + 1, new Instruction(OpCodes.Call, FindReadMethod(m, sig, methodRead)));
                             i++;
                             break;
                         }
                         case Code.Stfld:
                         case Code.Stsfld: {
-                            //storing field
-                            //add a call before it
+                            //storing field: add a call before it
                             t.Body.Instructions.Insert(i, new Instruction(OpCodes.Call, FindReadMethod(m, sig, methodWrite)));
                             i++;
                         }
@@ -61,8 +63,6 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
                     }
                 }
             }
-            
-            //TODO: apply to locals (if applied to methods)
         }
 
         private static MemberRefUser FindReadMethod(ModuleDef m, GenericInstSig sig, IMethod method)

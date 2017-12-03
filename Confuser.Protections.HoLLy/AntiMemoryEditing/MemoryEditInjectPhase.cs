@@ -11,15 +11,20 @@ namespace Confuser.Protections.HoLLy.AntiMemoryEditing
 {
     internal class MemoryEditInjectPhase : ProtectionPhase
     {
-        public override ProtectionTargets Targets => ProtectionTargets.Modules;
+        public override ProtectionTargets Targets => ProtectionTargets.Fields;
         public override string Name => "Memory obfuscation type injection";
 
         public MemoryEditInjectPhase(ConfuserComponent parent) : base(parent) { }
 
         protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
         {
+            //we only want to do this if any of the targets are in this module
+            if (!parameters.Targets.Any(a => a is FieldDef fd && fd.Module == context.CurrentModule))
+                return;
+            
             var m = context.CurrentModule;
 
+            //get services
             var service = context.Registry.GetService<IMemoryEditService>();
             var marker = context.Registry.GetService<IMarkerService>();
             var name = context.Registry.GetService<INameService>();

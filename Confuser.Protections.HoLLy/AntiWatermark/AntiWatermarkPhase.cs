@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Confuser.Core;
 using dnlib.DotNet;
 
@@ -12,14 +13,15 @@ namespace Confuser.Protections.HoLLy.AntiWatermark
 		public AntiWatermarkPhase(ConfuserComponent parent) : base(parent) { }
 		protected override void Execute(ConfuserContext context, ProtectionParameters parameters)
 		{
-			//look for watermark and remove it
-		    foreach (var md in context.Modules) {
-		        var attr = md.CustomAttributes.Find("ConfusedByAttribute");
+		    foreach (var m in parameters.Targets.Cast<ModuleDef>())
+		    {
+		        //look for watermark and remove it
+		        var attr = m.CustomAttributes.Find("ConfusedByAttribute");
 		        if (attr != null) {
-		            md.CustomAttributes.Remove(attr);
-		            md.Types.Remove((TypeDef)attr.AttributeType);
+		            m.CustomAttributes.Remove(attr);
+		            m.Types.Remove((TypeDef)attr.AttributeType);
 		        }
-		    }
-		}
+            }
+	    }
 	}
 }
