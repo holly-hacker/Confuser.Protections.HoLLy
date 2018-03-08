@@ -42,6 +42,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProcessHollowing\RunPE.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AntiMemoryEditing\ObfuscatedValue.cs" />
     <Compile Include="FakeObfuscator\AgileDotNet.cs" />
