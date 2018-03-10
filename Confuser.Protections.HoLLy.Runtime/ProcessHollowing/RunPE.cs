@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using dnlib;
+using dnlib.DotNet.Writer;
 
 namespace Confuser.Protections.HoLLy.Runtime.ProcessHollowing
 {
@@ -26,39 +27,40 @@ namespace Confuser.Protections.HoLLy.Runtime.ProcessHollowing
             int sizeOptHeader = BitConverter.ToInt32(newModule, offsetPE + 0x54);
 
             //start the remote/target process
-            if (!PInvokes.CreateProcess(pathToStart, null, IntPtr.Zero, IntPtr.Zero, false, 4 /*start paused*/, IntPtr.Zero, null, IntPtr.Zero, out PInvokes.PROCESS_INFORMATION pInfo))
+            if (!PInvokes.CreateProcess(pathToStart, null, IntPtr.Zero, IntPtr.Zero, false, 4 /*start paused*/, IntPtr.Zero, null, new byte[0x44], out PInvokes.PROCESS_INFORMATION pInfo))
                 throw new Exception("Couldn't create process");
-            var procId = new IntPtr(pInfo.dwProcessId);
 
             //get the remote image base from the PEB
             //we're also storing the thread context, because we'll update the entry point and then re-set it
-            var threadId = new IntPtr(pInfo.dwThreadId);
             IntPtr imageBasePtr;
             PInvokes.CONTEXT ctx = new PInvokes.CONTEXT { ContextFlags = PInvokes.CONTEXT_FLAGS.CONTEXT_INTEGER }; ;
             PInvokes.CONTEXT64 ctx64 = new PInvokes.CONTEXT64 { ContextFlags = PInvokes.CONTEXT_FLAGS.CONTEXT_INTEGER }; ;
-            //TODO: we're checking for remote (not own), is this the correct check?
             if (IntPtr.Size == 4) {
                 //32-bit process
-                PInvokes.GetThreadContext(threadId, ref ctx);
+                if (!PInvokes.GetThreadContext(pInfo.hThread, ref ctx))
+                    throw new Exception("Couldn't get thread context");
+
                 imageBasePtr = new IntPtr(ctx.Ebx + 8);
             }
             else {
+                //TODO: check for WoW
                 //64-bit process
-                PInvokes.GetThreadContext(threadId, ref ctx64);
+                if (!PInvokes.GetThreadContext(pInfo.hThread, ref ctx64))
+                    throw new Exception("Couldn't get thread context");
                 imageBasePtr = new IntPtr((long)ctx64.Rdx + 16);
             }
             
             //make sure we can read from the process. TODO: most likely not needed
             byte[] buffer = new byte[4];
-            if (!PInvokes.ReadProcessMemory(procId, imageBasePtr, buffer, 4, out var read1))
+            if (!PInvokes.ReadProcessMemory(pInfo.hProcess, imageBasePtr, buffer, 4, out var read1))
                 throw new Exception("Couldn't read from remote process");
 
             //allocate space in the remote process
-            var remotePtr = PInvokes.VirtualAllocEx(procId, new IntPtr(imageBase), sizeOfHeaders,
+            var remotePtr = PInvokes.VirtualAllocEx(pInfo.hProcess, new IntPtr(imageBase), sizeOfHeaders,
                 PInvokes.AllocationType.Commit | PInvokes.AllocationType.Reserve, PInvokes.MemoryProtection.ExecuteReadWrite);
 
             //write the image
-            if (!PInvokes.WriteProcessMemory(procId, remotePtr, newModule, sizeOptHeader, out var read2))
+            if (!PInvokes.WriteProcessMemory(pInfo.hProcess, remotePtr, newModule, sizeOptHeader, out var read2))
                 throw new Exception("Couldn't write to remote process");
 
             //copy the sections over
@@ -69,26 +71,26 @@ namespace Confuser.Protections.HoLLy.Runtime.ProcessHollowing
                 byte[] data = new byte[header[4]];
                 Buffer.BlockCopy(newModule, header[5] /*PointerToRawData*/, data, 0, data.Length);
 
-                if (!PInvokes.WriteProcessMemory(procId, new IntPtr(checked(remotePtr.ToInt32() + header[3] /*RVA*/)), data, data.Length, out var read3))
+                if (!PInvokes.WriteProcessMemory(pInfo.hProcess, new IntPtr(checked(remotePtr.ToInt32() + header[3] /*RVA*/)), data, data.Length, out var read3))
                     throw new Exception("Couldn't read from remote process");
             }
 
             //write new image base
             //TODO: can I do IntPtr.Size here? see above
-            if (!PInvokes.WriteProcessMemory(procId, imageBasePtr, BitConverter.GetBytes(remotePtr.ToInt64()), IntPtr.Size, out var read4))
+            if (!PInvokes.WriteProcessMemory(pInfo.hProcess, imageBasePtr, BitConverter.GetBytes(remotePtr.ToInt64()), IntPtr.Size, out var read4))
                 throw new Exception("Couldn't write to remote process");
 
             //edit entrypoint and rewrite context
             if (IntPtr.Size == 4) {
                 ctx.Eax = (uint)remotePtr.ToInt32() + addrEntryPoint;
-                PInvokes.SetThreadContext(procId, ref ctx);
+                PInvokes.SetThreadContext(pInfo.hThread, ref ctx);
             } else {
                 ctx64.Rcx = (ulong)remotePtr.ToInt64() + addrEntryPoint;
-                PInvokes.SetThreadContext(procId, ref ctx64);
+                PInvokes.SetThreadContext(pInfo.hThread, ref ctx64);
             }
 
             //resume the thread, if everything went well it should all work!
-            PInvokes.ResumeThread(procId);
+            PInvokes.ResumeThread(pInfo.hThread);
         }
 
         private class PInvokes
@@ -107,7 +109,8 @@ namespace Confuser.Protections.HoLLy.Runtime.ProcessHollowing
                 IntPtr lpEnvironment,
                 string lpCurrentDirectory,
                 //[In] ref STARTUPINFO lpStartupInfo,
-                IntPtr lpStartupInfo,
+                //IntPtr lpStartupInfo,
+                byte[] lpStartupInfo,
                 out PROCESS_INFORMATION lpProcessInformation);
 
             /*
