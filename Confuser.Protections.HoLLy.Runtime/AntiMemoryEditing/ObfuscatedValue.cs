@@ -88,4 +88,5 @@ namespace Confuser.Protections.HoLLy.Runtime.AntiMemoryEditing
             return sb.ToString();
         }
     }
+    //osu is good.. Hacktoberfest
 }
